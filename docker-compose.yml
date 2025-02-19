@@ -1,43 +1,64 @@
 services:
   db:
-      image: mysql
-      container_name: database
-      restart: always
-      environment:
-        MYSQL_ROOT_PASSWORD: password
-      ports:
-        - "3306:3306"
-      volumes:
-        - db:/var/lib/mysql
-        - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    image: mysql
+    container_name: database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  auth:
+    build: ./auth
+    container_name: auth_service
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - MYSQL_HOST=db
+    depends_on:
+      - db
+
+  filesystem:
+    build: ./filesystem
+    container_name: file_system_service
+    restart: always
+    ports:
+      - "5001:5001"
+    volumes:
+      - media-data:/media-data
+
   upload:
-      image: jyleon/upload_service
-      container_name: upload
-      restart: always
-      environment:
-        - MYSQL_HOST=db
-      ports:
-        - "8080:8080"
-      env_file:
-        - .env
-      volumes:
-        - media-data:/media-data
-      depends_on:
-        - db
+    build: ./upload
+    container_name: upload_service
+    restart: always
+    environment:
+      - AUTH_SERVICE_URL=http://auth:5000
+      - FILE_SYSTEM_URL=http://filesystem:5001
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - auth
+      - filesystem
+
   stream:
-      image: jyleon/stream_service
-      container_name: stream
-      restart: always
-      environment:
-        - MYSQL_HOST=db
-      ports:
-        - "8090:8090"
-      env_file:
-        - .env
-      volumes:
-        - media-data:/media-data
-      depends_on:
-        - db
+    build: ./stream
+    container_name: stream_service
+    restart: always
+    environment:
+      - AUTH_SERVICE_URL=http://auth:5000
+      - FILE_SYSTEM_URL=http://filesystem:5001
+    ports:
+      - "8090:8090"
+    depends_on:
+      - db
+      - auth
+      - filesystem
+
 volumes:
   db:
   media-data:
