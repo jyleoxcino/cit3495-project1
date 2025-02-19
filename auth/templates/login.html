@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <style>
+        /* Pop-up styling */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            z-index: 1000;
+        }
+        .popup button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .popup button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        function showPopup(message) {
+            var popup = document.getElementById("popup-message");
+            var popupText = document.getElementById("popup-text");
+            popupText.innerText = message;
+            popup.style.display = "block";
+        }
+        function closePopup() {
+            document.getElementById("popup-message").style.display = "none";
+        }
+    </script>
+</head>
+<body onload="{% if show_alert %} showPopup('{{ message }}'); {% endif %}">
+    <h2>Login</h2>
+    <form action="/login" method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- Custom Pop-up -->
+    <div id="popup-message" class="popup">
+        <p id="popup-text"></p>
+        <button onclick="closePopup()">OK</button>
+    </div>
+</body>
+</html>

@@ -1,5 +1,6 @@
 Flask
-PyJWT
+Flask-Login
 Flask-MySQLdb
 Werkzeug
+requests
 python-dotenv
