@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+</head>
+<body>
+    <h1>Now Playing: {{ filename }}</h1>
+    <video controls width="600">
+        <source src="{{ url_for('serve_file', filename=filename) }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <br>
+    <a href="{{ url_for('browse_files') }}">Back to Files</a>
+</body>
+</html>
