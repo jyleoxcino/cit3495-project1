@@ -1,24 +1,36 @@
 services:
   db:
-      image: mysql:latest
+      image: mysql
       container_name: mysql
       restart: always
       environment:
-        MYSQL_DATABASE: database
         MYSQL_ROOT_PASSWORD: password
-        MYSQL_USER: user
-        MYSQL_PASSWORD: password
       ports:
         - "3306:3306"
       volumes:
         - db:/var/lib/mysql
-        - .scripts/mysql-init:/docker-entrypoint-initdb.d
+        - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      networks:
+      - internal_net
   upload:
       image: jyleon/upload_service
       container_name: upload
       restart: always
+      environment:
+        - MYSQL_HOST=db
       ports:
         - "8080:8080"
+      env_file:
+        - .env
+      networks:
+      - internal_net
+      volumes:
+        - media-data:/media-data
+      depends_on:
+        - db
 volumes:
   db:
   media-data:
+networks:
+  internal_net:
+    driver: bridge
