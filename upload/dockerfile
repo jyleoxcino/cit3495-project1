@@ -1,0 +1,7 @@
+FROM ubuntu AS upload_service
+RUN apt-get update && apt-get install -y python3 python3-pip pkg-config libmysqlclient-dev && rm -rf /var/lib/apt/lists/*
+WORKDIR /usr/src/app
+COPY . ./
+EXPOSE 8080
+RUN pip install flask flask_login flask_mysqldb werkzeug --break-system-packages
+CMD ["python3", "main.py"]

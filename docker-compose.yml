@@ -12,7 +12,13 @@ services:
         - "3306:3306"
       volumes:
         - db:/var/lib/mysql
-        - ./scripts/mysql-init:/docker-entrypoint-initdb.d
+        - .scripts/mysql-init:/docker-entrypoint-initdb.d
+  upload:
+      image: jyleon/upload_service
+      container_name: upload
+      restart: always
+      ports:
+        - "8080:8080"
 volumes:
   db:
   media-data:

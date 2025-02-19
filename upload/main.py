@@ -102,4 +102,4 @@ def home():
     return redirect(url_for('upload'))  # Redirect logged-in users to the upload page
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8080, host='0.0.0.0')
