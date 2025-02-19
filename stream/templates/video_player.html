@@ -6,12 +6,12 @@
     <title>Video Player</title>
 </head>
 <body>
-    <h1>Now Playing: {{ filename }}</h1>
-    <video controls width="600">
-        <source src="{{ url_for('serve_file', filename=filename) }}" type="video/mp4">
+    <h1>Watching: {{ filename }}</h1>
+    <video width="640" height="360" controls>
+        <source src="{{ media_url }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
     <br>
-    <a href="{{ url_for('browse_files') }}">Back to Files</a>
+    <a href="{{ url_for('browse_files') }}">Back to Browse</a>
 </body>
 </html>

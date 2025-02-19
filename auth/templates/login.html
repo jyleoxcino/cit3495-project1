@@ -2,62 +2,77 @@
 <html lang="en">
 <head>
     <title>Login</title>
-    <style>
-        /* Pop-up styling */
-        .popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            z-index: 1000;
-        }
-        .popup button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            border: none;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .popup button:hover {
-            background-color: #45a049;
-        }
-    </style>
     <script>
         function showPopup(message) {
-            var popup = document.getElementById("popup-message");
-            var popupText = document.getElementById("popup-text");
-            popupText.innerText = message;
-            popup.style.display = "block";
-        }
-        function closePopup() {
-            document.getElementById("popup-message").style.display = "none";
+            if (message) {
+                alert(message);
+            }
         }
     </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        input {
+            width: 90%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .register-link {
+            margin-top: 15px;
+            display: block;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .register-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-<body onload="{% if show_alert %} showPopup('{{ message }}'); {% endif %}">
-    <h2>Login</h2>
-    <form action="/login" method="POST">
-        <label>Username:</label>
-        <input type="text" name="username" required>
-        <br>
-        <label>Password:</label>
-        <input type="password" name="password" required>
-        <br>
-        <button type="submit">Login</button>
-    </form>
+<body onload="showPopup('{{ message }}')">
 
-    <!-- Custom Pop-up -->
-    <div id="popup-message" class="popup">
-        <p id="popup-text"></p>
-        <button onclick="closePopup()">OK</button>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form action="{{ url_for('login') }}" method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <a class="register-link" href="{{ url_for('register') }}">Don't have an account? Register here</a>
     </div>
+
 </body>
 </html>

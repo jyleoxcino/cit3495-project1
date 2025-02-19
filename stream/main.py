@@ -1,49 +1,72 @@
 import os
 import requests
-from flask import Flask, request, jsonify, render_template
+import jwt
+import logging
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask_mysqldb import MySQL  # ✅ Import MySQLdb
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')
+AUTH_SERVICE_URL = os.getenv('AUTH_SERVICE_URL', 'http://localhost:5000')
+FILE_SYSTEM_URL = os.getenv('FILE_SYSTEM_URL', 'http://localhost:5001')  # ✅ Fix incorrect service name
 
-AUTH_SERVICE_URL = os.getenv('AUTH_SERVICE_URL', 'http://auth:5000')
-FILE_SYSTEM_URL = os.getenv('FILE_SYSTEM_URL', 'http://filesystem:5001')
+# ✅ Add MySQL configuration
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'db')  # MySQL container name
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'root')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', 'password')
+app.config['MYSQL_DB'] = 'uploads'  # Ensure this matches your MySQL database
+
+mysql = MySQL(app)  # ✅ Initialize MySQL
+
+logging.basicConfig(level=logging.INFO)
+
+def verify_token(token):
+    """Decodes and verifies JWT token"""
+    try:
+        decoded_token = jwt.decode(token, app.secret_key, algorithms=['HS256'])
+        return decoded_token.get('username')
+    except jwt.ExpiredSignatureError:
+        return None  # Token expired
+    except jwt.InvalidTokenError:
+        return None  # Invalid token
 
 @app.route('/browse', methods=['GET'])
 def browse_files():
-    token = request.headers.get('Authorization')
+    token = request.cookies.get('token')
     if not token:
-        return jsonify({'message': 'Token is missing'}), 401
+        return redirect(f"{AUTH_SERVICE_URL}/login?message=Please log in first.")
 
-    # Verify user token
-    auth_response = requests.get(f"{AUTH_SERVICE_URL}/verify", headers={'Authorization': token})
-    if auth_response.status_code != 200:
-        return jsonify({'message': 'Unauthorized'}), 401
+    # Verify token
+    username = verify_token(token)
+    if not username:
+        return redirect(f"{AUTH_SERVICE_URL}/login?message=Session expired. Please log in again.")
 
-    username = auth_response.json().get('username')
-
-    # Get list of files from File System Service
-    file_response = requests.get(f"{FILE_SYSTEM_URL}/files", headers={'Authorization': token})
-    
-    if file_response.status_code == 200:
-        files = file_response.json().get('files', [])
-        return render_template('browse.html', files=files, username=username)
-    else:
+    # ✅ Fetch all videos from the database (not just the current user)
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT filename, username FROM files")  # ✅ Remove 'uploads.' prefix
+        files = [{"filename": row[0], "uploaded_by": row[1]} for row in cur.fetchall()]
+        cur.close()
+    except Exception as e:
+        logging.error(f"Database error: {e}")
         return jsonify({'message': 'Could not fetch files'}), 500
+
+    return render_template('browse.html', files=files, username=username)
 
 @app.route('/media/<filename>', methods=['GET'])
 def view_media(filename):
-    token = request.headers.get('Authorization')
+    token = request.cookies.get('token')
     if not token:
-        return jsonify({'message': 'Token is missing'}), 401
+        return redirect(f"{AUTH_SERVICE_URL}/login?message=Please log in first.")
 
-    # Verify user token
-    auth_response = requests.get(f"{AUTH_SERVICE_URL}/verify", headers={'Authorization': token})
-    if auth_response.status_code != 200:
-        return jsonify({'message': 'Unauthorized'}), 401
+    # Verify token
+    username = verify_token(token)
+    if not username:
+        return redirect(f"{AUTH_SERVICE_URL}/login?message=Session expired. Please log in again.")
 
-    username = auth_response.json().get('username')
+    # ✅ Fix incorrect media URL (no need to include `username`)
+    media_url = f"http://localhost:5001/files/{filename}"
 
-    # Stream file from File System Service
-    media_url = f"{FILE_SYSTEM_URL}/files/{filename}"
     return render_template('video_player.html', filename=filename, media_url=media_url, username=username)
 
 if __name__ == '__main__':

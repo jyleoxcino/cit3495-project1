@@ -5,62 +5,84 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: credentials  # Ensure database is created
     ports:
       - "3306:3306"
     volumes:
       - db:/var/lib/mysql
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts:/docker-entrypoint-initdb.d   # Ensure correct path
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
 
   auth:
     build: ./auth
     container_name: auth_service
     restart: always
+    env_file:
+      - .env  # Use environment variables from .env
     ports:
       - "5000:5000"
-    environment:
-      - MYSQL_HOST=db
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=password
-      - SECRET_KEY=${SECRET_KEY}
     depends_on:
-      - db
+      db:
+        condition: service_healthy  # Ensure MySQL is ready
 
   filesystem:
     build: ./filesystem
     container_name: file_system_service
     restart: always
+    environment:
+      - AUTH_SERVICE_URL=http://auth:5000  # Ensure auth is accessible
+      - SECRET_KEY=your_secret_key
     ports:
       - "5001:5001"
     volumes:
       - media-data:/media-data
+    depends_on:
+      db:
+        condition: service_healthy
+      auth:
+        condition: service_started  # Ensure auth is running first
 
   upload:
     build: ./upload
     container_name: upload_service
     restart: always
+    env_file:
+      - .env
     environment:
       - AUTH_SERVICE_URL=http://auth:5000
       - FILE_SYSTEM_URL=http://filesystem:5001
     ports:
       - "8080:8080"
     depends_on:
-      - db
-      - auth
-      - filesystem
+      db:
+        condition: service_healthy
+      auth:
+        condition: service_started
+      filesystem:
+        condition: service_started
 
   stream:
     build: ./stream
     container_name: stream_service
     restart: always
+    env_file:
+      - .env
     environment:
       - AUTH_SERVICE_URL=http://auth:5000
       - FILE_SYSTEM_URL=http://filesystem:5001
     ports:
       - "8090:8090"
     depends_on:
-      - db
-      - auth
-      - filesystem
+      db:
+        condition: service_healthy
+      auth:
+        condition: service_started
+      filesystem:
+        condition: service_started
 
 volumes:
   db:
