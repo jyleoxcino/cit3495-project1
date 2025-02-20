@@ -14,7 +14,7 @@ FILE_SYSTEM_URL = os.getenv('FILE_SYSTEM_URL', 'http://localhost:5001')  # ✅ F
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'db')  # MySQL container name
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'root')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', 'password')
-app.config['MYSQL_DB'] = 'uploads'  # Ensure this matches your MySQL database
+app.config['MYSQL_DB'] = os.getenv('MEDIA_DB','uploads')  # Ensure this matches your MySQL database
 
 mysql = MySQL(app)  # ✅ Initialize MySQL
 
@@ -29,7 +29,13 @@ def verify_token(token):
         return None  # Token expired
     except jwt.InvalidTokenError:
         return None  # Invalid token
-
+@app.route('/')
+def home():
+    token = request.cookies.get('token')
+    if not token or not verify_token(token):
+        return redirect(f"{AUTH_SERVICE_URL}/login?message=Please log in first.")
+    
+    return redirect(url_for('browse_files'))
 @app.route('/browse', methods=['GET'])
 def browse_files():
     token = request.cookies.get('token')

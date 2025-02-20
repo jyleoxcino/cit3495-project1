@@ -39,6 +39,9 @@ def verify_token(token):
         logging.error("Invalid token")  # ✅ Debugging
         return None
 
+@app.route('/')
+def home():
+    return jsonify({'message': 'Welcome to the File System Service. API is running.'})
 
 def allowed_file(filename):
     """Check if file has a valid extension"""

@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')
 AUTH_SERVICE_URL = os.getenv('AUTH_SERVICE_URL', 'http://localhost:5000')
-FILE_SYSTEM_URL = os.getenv('FILE_SYSTEM_URL', 'http://localhost:5001')
+FILE_SYSTEM_URL = os.getenv('FILE_SYSTEM_URL', 'http://filesystem:5001')
 
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB upload limit
 
@@ -18,7 +18,7 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB upload limit
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'db')
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'root')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', 'password')
-app.config['MYSQL_DB'] = 'uploads'  # Ensure this matches MySQL DB name
+app.config['MYSQL_DB'] = os.getenv('MEDIA_DB','uploads')
 
 mysql = MySQL(app)  # ✅ Initialize MySQL
 
@@ -37,6 +37,13 @@ def verify_token(token):
     except jwt.InvalidTokenError:
         logging.error("Invalid token")
         return None
+@app.route('/')
+def home():
+    token = request.cookies.get('token')
+    if not token or not verify_token(token):
+        return redirect(f"{AUTH_SERVICE_URL}/login?message=Please log in first.")
+    
+    return redirect(url_for('upload'))
 
 def allowed_file(filename):
     """Check if file extension is allowed"""
@@ -54,6 +61,7 @@ def upload():
         return redirect(f"{AUTH_SERVICE_URL}/login?message=Session expired. Please log in again.")
 
     return render_template('upload.html', username=username)  # ✅ Show upload page
+
 @app.route('/process_upload', methods=['POST'])
 def process_upload():
     """Handles the video upload process."""
@@ -100,6 +108,11 @@ def process_upload():
 def upload_success():
     """✅ Success page for uploads"""
     return render_template('success.html')
+@app.route('/logout')
+def logout():
+    response = redirect(f"{AUTH_SERVICE_URL}/login?message=You have been logged out.")
+    response.set_cookie('token', '', expires=0)  # ✅ Clears the authentication token
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080, host='0.0.0.0')

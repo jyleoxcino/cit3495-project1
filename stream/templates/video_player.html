@@ -4,14 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .player-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 700px;
+        }
+        h1 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        video {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .back-link:hover {
+            background: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Watching: {{ filename }}</h1>
-    <video width="640" height="360" controls>
-        <source src="{{ media_url }}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-    <br>
-    <a href="{{ url_for('browse_files') }}">Back to Browse</a>
+
+    <div class="player-container">
+        <h1>Watching: {{ filename }}</h1>
+        <video controls>
+            <source src="{{ media_url }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <br>
+        <a class="back-link" href="{{ url_for('browse_files') }}">Back to Browse</a>
+    </div>
+
 </body>
 </html>
