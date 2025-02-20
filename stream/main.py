@@ -29,7 +29,13 @@ def verify_token(token):
         return None  # Token expired
     except jwt.InvalidTokenError:
         return None  # Invalid token
-
+@app.route('/')
+def home():
+    token = request.cookies.get('token')
+    if not token or not verify_token(token):
+        return redirect(f"{AUTH_SERVICE_URL}/login?message=Please log in first.")
+    
+    return redirect(url_for('browse_files'))
 @app.route('/browse', methods=['GET'])
 def browse_files():
     token = request.cookies.get('token')

@@ -4,24 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Files</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .browse-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 420px;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #fff;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
+            transition: 0.2s;
+        }
+        li:hover {
+            background: #e9ecef;
+            transform: scale(1.02);
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+            margin-top: 12px;
+            transition: 0.2s;
+        }
+        .upload-btn {
+            background: #007BFF;
+        }
+        .upload-btn:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+        .dashboard-btn {
+            background: #17a2b8;
+        }
+        .dashboard-btn:hover {
+            background: #138496;
+            transform: scale(1.05);
+        }
+        .logout-btn {
+            background: #dc3545;
+        }
+        .logout-btn:hover {
+            background: #b02a37;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome, {{ username }}</h1>
-    <h2>Uploaded Videos:</h2>
-    <ul>
-        {% for file in files %}
-            <li>
-                <a href="{{ url_for('view_media', filename=file.filename) }}">{{ file.filename }}</a> 
-                (Uploaded by: {{ file.uploaded_by }})
-            </li>
-        {% endfor %}
-    </ul>
-    <br>
-    <a href="http://localhost:8080/upload">
-        <button>Upload More Videos</button>
-    </a>
 
-    <br><br>
-    <a href="http://localhost:5000/logout"><button>Logout</button></a>
+    <div class="browse-container">
+        <h1>Welcome, {{ username }}</h1>
+        <h2>Uploaded Videos:</h2>
+        <ul>
+            {% for file in files %}
+                <li>
+                    <a href="{{ url_for('view_media', filename=file.filename) }}">{{ file.filename }}</a> 
+                    <br><span style="color: #555;">Uploaded by: {{ file.uploaded_by }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <a href="http://localhost:8080/upload">
+            <button class="upload-btn">Upload More Videos</button>
+        </a>
+
+        <a href="http://localhost:5000/dashboard">
+            <button class="dashboard-btn">Back to Dashboard</button>
+        </a>
+
+        <a href="http://localhost:5000/logout">
+            <button class="logout-btn">Logout</button>
+        </a>
+    </div>
+
 </body>
 </html>

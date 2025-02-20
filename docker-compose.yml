@@ -3,9 +3,8 @@ services:
     image: mysql
     container_name: database
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: credentials  # Ensure database is created
+    env_file:
+      - .env
     ports:
       - "3306:3306"
     volumes:
@@ -33,9 +32,8 @@ services:
     build: ./filesystem
     container_name: file_system_service
     restart: always
-    environment:
-      - AUTH_SERVICE_URL=http://auth:5000  # Ensure auth is accessible
-      - SECRET_KEY=your_secret_key
+    env_file:
+      - .env
     ports:
       - "5001:5001"
     volumes:
@@ -52,9 +50,6 @@ services:
     restart: always
     env_file:
       - .env
-    environment:
-      - AUTH_SERVICE_URL=http://auth:5000
-      - FILE_SYSTEM_URL=http://filesystem:5001
     ports:
       - "8080:8080"
     depends_on:
@@ -71,9 +66,6 @@ services:
     restart: always
     env_file:
       - .env
-    environment:
-      - AUTH_SERVICE_URL=http://auth:5000
-      - FILE_SYSTEM_URL=http://filesystem:5001
     ports:
       - "8090:8090"
     depends_on:

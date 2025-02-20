@@ -11,7 +11,7 @@ app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'db')
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'root')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', 'password')
-app.config['MYSQL_DB'] = 'credentials'
+app.config['MYSQL_DB'] = os.getenv('CREDENTIALS_DB','credentials')
 
 mysql = MySQL(app)
 
@@ -24,6 +24,14 @@ def verify_token(token):
         return None  # Token expired
     except jwt.InvalidTokenError:
         return None  # Invalid token
+    
+@app.route('/')
+def home():
+    token = request.cookies.get('token')
+    if token and verify_token(token):
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     message = request.args.get('message', '')
@@ -52,6 +60,10 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    token = request.cookies.get('token')
+    if token and verify_token(token):
+        return redirect(url_for('dashboard'))
+    
     message = request.args.get('message', '')
 
     if request.method == 'POST':
@@ -94,6 +106,7 @@ def dashboard():
         return redirect(url_for('login', message="Session expired. Please log in again."))
 
     return render_template('dashboard.html', username=username)  # Show dashboard
+
 
 @app.route('/logout')
 def logout():
