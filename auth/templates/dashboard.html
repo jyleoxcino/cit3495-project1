@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .dashboard-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        p {
+            font-size: 16px;
+            color: #555;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+        }
+        .upload-btn {
+            background: #007BFF;
+        }
+        .upload-btn:hover {
+            background: #0056b3;
+        }
+        .browse-btn {
+            background: #28a745;
+        }
+        .browse-btn:hover {
+            background: #218838;
+        }
+        .logout-btn {
+            background: #dc3545;
+        }
+        .logout-btn:hover {
+            background: #b02a37;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h2>Welcome, {{ username }}!</h2>
+        <p>Choose an action:</p>
+        <div class="button-container">
+            <a href="http://localhost:8080/upload"><button class="upload-btn">Upload Videos</button></a>
+            <a href="http://localhost:8090/browse"><button class="browse-btn">Browse & Stream Videos</button></a>
+            <a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a>
+        </div>
+    </div>
+
+</body>
+</html>

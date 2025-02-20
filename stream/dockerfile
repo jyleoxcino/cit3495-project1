@@ -1,7 +1,10 @@
 FROM ubuntu AS stream_service
 RUN apt-get update && apt-get install -y python3 python3-pip pkg-config libmysqlclient-dev && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /usr/src/app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt --break-system-packages
+
 COPY . ./
 EXPOSE 8090
-RUN pip install flask flask_login flask_mysqldb werkzeug python-dotenv --break-system-packages
 CMD ["python3", "main.py"]
